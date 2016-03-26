@@ -1,19 +1,33 @@
 %{
-#include "calc.tab.h"
+	#include "calc.tab.h"
 %}
 
 %%
 
-[0-9]+	{
-			yylval = atoi(yytext);
-			return INTEGER;
-		}
+	/* variables */
+[a-z]		{
+				yylval = *yytext - 'a';
+				return VARIABLE;
+			}
 
-[-+\n]	return *yytext;
+	/* integers */
+[0-9]+		{
+				yylval = atoi(yytext);
+				return INTEGER;
+			}
 
-[ \t]	; /* skip whitespace */
+	/* operators */
+[-+()*=/\n]	{
+				return *yytext;
+			}
 
-.		yyerror("invalid character");
+	/* skip whitespace */
+[ \t]		;
+
+	/* anything else is an error */
+.			{
+				yyerror("invalid character");
+			}
 
 %%
 
