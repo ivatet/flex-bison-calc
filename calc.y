@@ -1,28 +1,56 @@
 %{
-	#include <stdio.h>
-
-	int sym[26];
+	#include "calc.h"
 %}
 
-%token INTEGER VARIABLE
+%union
+{
+	int number;
+	char *string;
+}
+
+%token <number> INTEGER
+%token <string> VARIABLE
+
+%type <number> expr
+
 %left '+' '-'
 %left '*' '/'
 
+%start program
+
 %%
 
-program:
-	program statement '\n'
-	|
+program
+	: program statement '\n'
+	| program error '\n'
+	| statement '\n'
+	| error '\n'
 	;
 
-statement:
-	expr				{ printf("%d\n", $1); }
-	| VARIABLE '=' expr	{ sym[$1] = $3; }
+statement
+	: expr			{ calc_expr($1); }
+	| VARIABLE '=' expr	{
+					calc_set_var($1, $3);
+					free($1);
+				}
 	;
 
-expr:
-	INTEGER
-	| VARIABLE			{ $$ = sym[$1]; }
+expr
+	: INTEGER
+	| VARIABLE		{
+					int val;
+					int rc;
+
+					rc = calc_get_var($1, &val);
+
+					free($1);
+
+					if (!rc) {
+						$$ = val;
+					} else {
+						$$ = 0;
+					}
+				}
 	| expr '+' expr		{ $$ = $1 + $3; }
 	| expr '-' expr		{ $$ = $1 - $3; }
 	| expr '*' expr		{ $$ = $1 * $3; }
@@ -32,14 +60,7 @@ expr:
 
 %%
 
-int yyerror(char *s)
+void yyerror(char *s)
 {
-	fprintf(stderr, "%s\n", s);
-	return 0;
-}
-
-int main(void)
-{
-	yyparse();
-	return 0;
+	calc_error(s);
 }

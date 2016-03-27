@@ -2,36 +2,31 @@
 	#include "calc.tab.h"
 %}
 
+%option noyywrap
+
 %%
 
-	/* variables */
-[a-z]		{
-				yylval = *yytext - 'a';
-				return VARIABLE;
-			}
+		/* variables */
+[a-z][0-9a-z]*	{
+			yylval.string = strdup(yytext);
+			return VARIABLE;
+		}
 
-	/* integers */
+		/* integers */
 [0-9]+		{
-				yylval = atoi(yytext);
-				return INTEGER;
-			}
+			yylval.number = atoi(yytext);
+			return INTEGER;
+		}
 
-	/* operators */
+		/* operators */
 [-+()*=/\n]	{
-				return *yytext;
-			}
+			return *yytext;
+		}
 
-	/* skip whitespace */
+		/* skip whitespace */
 [ \t]		;
 
-	/* anything else is an error */
-.			{
-				yyerror("invalid character");
-			}
-
-%%
-
-int yywrap(void)
-{
-	return 1;
-}
+		/* anything else is an error */
+.		{
+			yyerror("invalid character");
+		}
