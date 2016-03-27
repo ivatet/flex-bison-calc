@@ -23,8 +23,10 @@
 program
 	: program statement '\n'
 	| program error '\n'
+	| program '\n'
 	| statement '\n'
 	| error '\n'
+	| '\n'
 	;
 
 statement
