@@ -27,7 +27,7 @@
 		}
 
 		/* integers */
-[0-9]+		{
+-?[0-9]++	{
 			yylval.number = atoi(yytext);
 			return INTEGER;
 		}
